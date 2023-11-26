@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: prod.Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: front.Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=pc_pokemon
+      - MYSQL_ROOT_PASSWORD=root
+    expose:
+      - "3306"
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  db:

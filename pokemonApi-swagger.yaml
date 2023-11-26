@@ -1,0 +1,1424 @@
+openapi: 3.0.3
+info:
+  title: PC Pokemon API
+  description: |-
+    This is an API for the PC Pokemon, it has been designed with ACI.
+  contact:
+    email: alex.cinq@epita.fr
+  version: 1.0.1
+servers:
+  - url: https://localhost:8000
+tags:
+  - name: Connection
+    description: The routes to handle the connection of the user
+  - name: Trainers
+    description: The routes to manipulate the trainers data
+  - name: Boxes
+    description: The routes to manipulate the Boxes data related to the trainers
+  - name: Pokemons
+    description: The routes to manipulate the Pokemons related to the trainers and the boxes
+  - name: Trades
+    description: The routes to manipulate the trades related to the trainers and their pokemons
+
+paths:
+  /login:
+    post:
+      tags:
+        - Connection
+      summary: log in an existing user
+      description: It sends back an access token for a user
+      requestBody:
+        description: the login and password of a user
+        content:
+          application/json:
+            schema:
+              type: object
+              description: a login and password inputted by a user
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                  format: email
+                  example: ash.ketchum@kanto.fr
+                password:
+                  type: string
+                  format: password
+                  example: mypassword
+      responses:
+        "200":
+          description: Successfully Connected
+          content:
+            application/json:
+              schema:
+                type: object
+                description: an object containing the access token
+                required:
+                  - accessToken
+                  - trainerId
+                properties:
+                  accessToken:
+                    type: string
+                    example: ey..
+                  trainerId:
+                    type: number
+                    example: 42
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: Wrong username or password
+
+  /subscribe:
+    post:
+      tags:
+        - Connection
+      summary: creates a new user
+      description: It create a new user and sends back an access token for a user
+      requestBody:
+        description: the information of the user
+        content:
+          application/json:
+            schema:
+              type: object
+              description: a login and password inputted by a user
+              required:
+                - lastName
+                - firstName
+                - login
+                - birthDate
+                - password
+              allOf:
+                - $ref: "#/components/schemas/Trainer"
+                - type: object
+                  properties:
+                    password:
+                      type: string
+                      format: password
+                      example: mypassword
+      responses:
+        "201":
+          description: User successfuly created
+          content:
+            application/json:
+              schema:
+                type: object
+                description: an object containing the access token
+                required:
+                  - accessToken
+                properties:
+                  accessToken:
+                    type: string
+                    example: ey..
+                  trainerId:
+                    type: number
+                    example: 42
+        "400":
+          description: Your request doesn't have the fields expected
+        "409":
+          description: The login is already in use
+
+  /trainers:
+    get:
+      tags:
+        - Trainers
+      summary: searches for trainers
+      description: It searching the trainers matching the given criteria
+      parameters:
+        - in: query
+          name: page
+          description: >-
+            the page number, it equals the number of trainers found / pageSize parameter
+            if not specified it equals 0
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - in: query
+          name: pageSize
+          description: >-
+            the number of trainers per page
+            if not specified it equals 20
+          schema:
+            type: integer
+            minimum: 1
+            example: 20
+        - in: query
+          name: firstName
+          description: filters all the trainers whose firstName contains this string
+          schema:
+            type: string
+            example: "Ash"
+        - in: query
+          name: lastName
+          description: filters all the trainers whose lastName contains this string
+          schema:
+            type: string
+            example: "tchum"
+        - in: query
+          name: login
+          description: filters all the trainers whose login contains this string
+          schema:
+            type: string
+            example: ".ketchum"
+      responses:
+        "200":
+          description: A list of trainers matching the criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - lastName
+                    - firstName
+                    - login
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: number
+                          description: the unique identifier of a trainer
+                          example: 42
+                        lastName:
+                          type: string
+                          example: Ketchum
+                        firstName:
+                          type: string
+                          example: Ash
+                        login:
+                          type: string
+                          format: email
+                          example: ash.ketchum@kanto.fr
+        "401":
+          description: User not authorized
+      security:
+        - bearerAuth: []
+
+  /trainers/{trainerId}:
+    get:
+      tags:
+        - Trainers
+      summary: retrieve data on a trainer
+      description: It retrieves the data on one particular trainer
+      parameters:
+        - in: path
+          name: trainerId
+          description: the unique identifier of a trainer
+          required: true
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: The data of the trainer matching the given trainerId
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - firstName
+                  - lastName
+                  - login
+                  - birthDate
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a trainer
+                        example: 42
+                  - $ref: "#/components/schemas/Trainer"
+        "401":
+          description: User not authorized
+        "404":
+          description: The trainerId does not match any of the trainers
+      security:
+        - bearerAuth: []
+    patch:
+      tags:
+        - Trainers
+      summary: updates the data of a trainer
+      description: It updates the data on one particular trainer
+      parameters:
+        - in: path
+          name: trainerId
+          description: the unique identifier of a trainer
+          required: true
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        description: the information of the trainer
+        content:
+          application/json:
+            schema:
+              type: object
+              description: the trainer data
+              allOf:
+                - type: object
+                  properties:
+                    lastName:
+                      type: string
+                      example: Ketchum
+                    firstName:
+                      type: string
+                      example: Ash
+                    birthDate:
+                      type: string
+                      format: date
+                      example: 1997-04-01
+                    password:
+                      type: string
+                      format: password
+                      example: mypassword
+      responses:
+        "200":
+          description: The data of the trainer have been updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - firstName
+                  - lastName
+                  - login
+                  - birthDate
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a pokemon
+                        example: 42
+                  - $ref: "#/components/schemas/Trainer"
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Trainers
+      summary: deletes the trainer
+      description: It deletes everything about a trainer
+      parameters:
+        - in: path
+          name: trainerId
+          description: the unique identifier of a trainer
+          required: true
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: The data of the trainer have been entirely removed
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+      security:
+        - bearerAuth: []
+
+  /trainers/{trainerId}/boxes:
+    get:
+      tags:
+        - Boxes
+      summary: retrieving all the boxes of a trainer
+      description: It retrieves the main data of all the boxes of a trainer
+      parameters:
+        - in: path
+          name: trainerId
+          required: true
+          description: the unique identifier of a trainer
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: A list of the main data of the boxes of a trainer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - name
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: number
+                          description: the unique identifier of a box
+                          example: 28640
+                    - $ref: "#/components/schemas/Box"
+        "401":
+          description: User not authorized
+        "404":
+          description: The trainerId does not match any of the trainers
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+        - Boxes
+      summary: creates a box linked to the calling trainer
+      description: It creates a new box for the calling trainer
+      parameters:
+        - in: path
+          name: trainerId
+          description: the unique identifier of a trainer
+          required: true
+          schema:
+            type: integer
+            example: 42
+      requestBody:
+        description: the information of the box
+        content:
+          application/json:
+            schema:
+              type: object
+              description: the box data
+              allOf:
+                - $ref: "#/components/schemas/Box"
+      responses:
+        "201":
+          description: The box have been created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a box
+                        example: 28640
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+      security:
+        - bearerAuth: []
+
+  /trainers/{trainerId}/boxes/{boxId}:
+    get:
+      tags:
+        - Boxes
+      summary: retrieve data on the box of a trainer
+      description: It retrieves the data on one particular box of a trainer
+      parameters:
+        - in: path
+          name: trainerId
+          description: the unique identifier of a trainer
+          required: true
+          schema:
+            type: integer
+            example: 42
+        - in: path
+          name: boxId
+          description: the unique identifier of a box
+          required: true
+          schema:
+            type: integer
+            example: 28640
+      responses:
+        "200":
+          description: The data of the box matching the given boxId
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - name
+                  - pokemons
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a box
+                        example: 28640
+                  - $ref: "#/components/schemas/Box"
+                  - type: object
+                    properties:
+                      pokemons:
+                        type: array
+                        maxItems: 30
+                        uniqueItems: true
+                        items:
+                          type: object
+                          required:
+                            - id
+                            - species
+                            - name
+                            - level
+                            - genderTypeCode
+                            - isShiny
+                          allOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: number
+                                  description: the unique identifier of a pokemon
+                                  example: 4242
+                                species:
+                                  type: string
+                                  maxLength: 12
+                                  example: Pikachu
+                                name:
+                                  type: string
+                                  description: by default should be the same as species
+                                  maxLength: 12
+                                  example: ThunderBoy
+                                level:
+                                  type: integer
+                                  minimum: 1
+                                  maximum: 100
+                                  example: 18
+                                genderTypeCode:
+                                  type: string
+                                  enum: [MALE, FEMALE, NOT_DEFINED]
+                                  example: NOT_DEFINED
+                                isShiny:
+                                  type: boolean
+                                  example: true
+        "401":
+          description: User not authorized
+        "404":
+          description: >-
+            The trainerId does not match any of the trainers
+            || The boxId does not match any of the boxes of the trainer
+      security:
+        - bearerAuth: []
+    patch:
+      tags:
+        - Boxes
+      summary: updates the data of a box
+      description: It updates the data on one particular box
+      parameters:
+        - in: path
+          name: trainerId
+          description: the unique identifier of a trainer
+          required: true
+          schema:
+            type: integer
+            example: 42
+        - in: path
+          name: boxId
+          description: the unique identifier of a box
+          required: true
+          schema:
+            type: integer
+            example: 28640
+      requestBody:
+        description: the information of the box
+        content:
+          application/json:
+            schema:
+              type: object
+              description: the box data
+              allOf:
+                - $ref: "#/components/schemas/Box"
+      responses:
+        "200":
+          description: The data of the box have been updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - name
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a box
+                        example: 28640
+                  - $ref: "#/components/schemas/Box"
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Boxes
+      summary: deletes the box of the trainer
+      description: It deletes everything about the box of a trainer
+      parameters:
+        - in: path
+          name: trainerId
+          description: the unique identifier of a trainer
+          required: true
+          schema:
+            type: integer
+            example: 42
+        - in: path
+          name: boxId
+          description: the unique identifier of a box
+          required: true
+          schema:
+            type: integer
+            example: 28640
+      responses:
+        "200":
+          description: The data of the box have been entirely removed
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+      security:
+        - bearerAuth: []
+
+  /trainers/{trainerId}/pokemons:
+    get:
+      tags:
+        - Pokemons
+      summary: retrieving all the Pokemons of a trainer at once
+      description: It retrieves the main data of all the Pokemons of a trainer
+      parameters:
+        - in: path
+          name: trainerId
+          required: true
+          description: the unique identifier of a trainer
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: a list of pokemons related to the trainer with the unique identifier trainerId
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - species
+                    - name
+                    - level
+                    - genderTypeCode
+                    - isShiny
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: number
+                          description: the unique identifier of a pokemon
+                          example: 4242
+                    - $ref: "#/components/schemas/PokemonData"
+        "401":
+          description: User not authorized
+        "404":
+          description: The trainerId does not match any of the trainers
+      security:
+        - bearerAuth: []
+
+  /trainers/{trainerId}/trades:
+    get:
+      tags:
+        - Trades
+      summary: retrieving all the trades of a trainer
+      description: It retrieves the main data of all the trades of a trainer
+      parameters:
+        - in: path
+          name: trainerId
+          required: true
+          description: the unique identifier of a trainer
+          schema:
+            type: integer
+            example: 42
+        - in: query
+          name: page
+          description: >-
+            the page number, it equals the number of trades found / pageSize parameter
+            if not specified it equals 0
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - in: query
+          name: pageSize
+          description: >-
+            the number of trades per page
+            if not specified it equals 20
+          schema:
+            type: integer
+            minimum: 1
+            example: 20
+        - in: query
+          name: orderBy
+          description: >-
+            The order in which the trades will be returned :
+            - ASC : the older ones first
+            - DESC : the recent ones first
+            The default value for this parameter is desc
+          schema:
+            type: string
+            enum: [ ASC,DESC ]
+            example: "ASC"
+        - in: query
+          name: statusCode
+          description: filters all the trades whose statusCode match this one
+          schema:
+            type: string
+            enum: [ PROPOSITION,ACCEPTED,DECLINED ]
+            example: ACCEPTED
+      responses:
+        "200":
+          description: A list of the main data of the trades of a trainer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - statusCode
+                    - receiver
+                    - sender
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: number
+                          description: the unique identifier of a box
+                          example: 28640
+                        statusCode:
+                          type: string
+                          enum: [PROPOSITION,ACCEPTED,DECLINED]
+                          example: ACCEPTED
+                        receiver:
+                          type: object
+                          required:
+                            - id
+                          allOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: number
+                                  description: the unique identifier of a trainer
+                                  example: 42
+                        sender:
+                          type: object
+                          required:
+                            - id
+                          allOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: number
+                                  description: the unique identifier of a trainer
+                                  example: 24
+        "401":
+          description: User not authorized
+        "404":
+          description: The trainerId does not match any of the trainers
+      security:
+        - bearerAuth: []
+
+  /pokemons:
+    get:
+      tags:
+        - Pokemons
+      summary: searches for pokemons
+      description: It searching the pokemons matching the given criteria
+      parameters:
+        - in: query
+          name: page
+          description: >-
+            the page number, it equals the number of pokemons found / pageSize parameter
+            if not specified it equals 0
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - in: query
+          name: pageSize
+          description: >-
+            the number of pokemons per page
+            if not specified it equals 20
+          schema:
+            type: integer
+            minimum: 1
+            example: 20
+        - in: query
+          name: species
+          description: filters all the pokemons whose species contains this string
+          schema:
+            type: string
+            example: "Pika"
+        - in: query
+          name: levelMin
+          description: filters all the pokemons whose level is more or equal this integer
+          schema:
+            type: integer
+            example: 1
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: levelMax
+          description: filters all the pokemons whose level is less or equal this integer
+          schema:
+            type: integer
+            example: 100
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: gender
+          description: filters all the pokemons whose gender match this string
+          schema:
+            type: string
+            enum: [MALE, FEMALE, NOT_DEFINED]
+            example: NOT_DEFINED
+        - in: query
+          name: sizeMin
+          description: filters all the pokemons whose size in centimeters is greater or equal than this integer
+          schema:
+            type: integer
+            example: 183
+            minimum: 1
+        - in: query
+          name: sizeMax
+          description: filters all the pokemons whose size in centimeters is lesser or equal than this integer
+          schema:
+            type: integer
+            example: 212
+            minimum: 1
+        - in: query
+          name: weightMin
+          description: filters all the pokemons whose weight in kilograms is greater or equal than this integer
+          schema:
+            type: integer
+            format: float
+            example: 2.7
+            minimum: 0.1
+        - in: query
+          name: weightMax
+          description: filters all the pokemons whose weight in kilograms is lesser or equal than this integer
+          schema:
+            type: integer
+            format: float
+            example: 9.5
+            minimum: 0.1
+        - in: query
+          name: isShiny
+          description: filter all the pokemons who are or aren't shiny
+          schema:
+            type: boolean
+            example: true
+      responses:
+        "200":
+          description: A list of pokemons matching the criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - trainerId
+                    - species
+                    - name
+                    - level
+                    - genderTypeCode
+                    - isShiny
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: number
+                          description: the unique identifier of a pokemon
+                          example: 4242
+                        trainerId:
+                          type: number
+                          description: the unique identifier of the trainer related to this pokemon
+                          example: 42
+                    - $ref: "#/components/schemas/PokemonData"
+        "401":
+          description: User not authorized
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+        - Pokemons
+      summary: creates a pokemon linked to the calling trainer
+      description: >-
+        It creates a pokemon and associate it to a user.
+        It will be sent to the first trainer's box that have room.
+        If none have one will be created.
+      requestBody:
+        description: the information of the pokemon
+        content:
+          application/json:
+            schema:
+              type: object
+              description: the pokemon data
+              required:
+                - species
+                - level
+                - genderTypeCode
+                - size
+                - weight
+                - isShiny
+              allOf:
+                - $ref: "#/components/schemas/Pokemon"
+      responses:
+        "201":
+          description: The pokemon have been created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a pokemon
+                        example: 4242
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: User not authorized
+      security:
+        - bearerAuth: []
+
+  /pokemons/{pokemonId}:
+    get:
+      tags:
+        - Pokemons
+      summary: retrieve data on a pokemon
+      description: It retrieves the data on one particular pokemon
+      parameters:
+        - in: path
+          name: pokemonId
+          description: the unique identifier of a pokemon
+          required: true
+          schema:
+            type: integer
+            example: 4242
+      responses:
+        "200":
+          description: The data of the pokemon matching the given pokemonId
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - species
+                  - name
+                  - level
+                  - genderTypeCode
+                  - size
+                  - weight
+                  - isShiny
+                  - trainerId
+                  - boxId
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a pokemon
+                        example: 4242
+                      trainerId:
+                        type: number
+                        description: the unique identifier of a trainer
+                        example: 42
+                      boxId:
+                        type: number
+                        description: the unique identifier of a box
+                        example: 15
+                  - $ref: "#/components/schemas/Pokemon"
+        "401":
+          description: User not authorized
+        "404":
+          description: The pokemonId does not match any of the pokemons
+      security:
+        - bearerAuth: []
+    patch:
+      tags:
+        - Pokemons
+      summary: updates the data of a pokemon
+      description: It updates the data on one particular pokemon
+      parameters:
+        - in: path
+          name: pokemonId
+          description: the unique identifier of a pokemon
+          required: true
+          schema:
+            type: integer
+            example: 4242
+      requestBody:
+        description: the information of the pokemon
+        content:
+          application/json:
+            schema:
+              type: object
+              description: the pokemon data
+              allOf:
+                - $ref: "#/components/schemas/Pokemon"
+                - type: object
+                  properties:
+                    boxId:
+                      type: number
+                      description: the unique identifier of a box
+                      example: 15
+      responses:
+        "200":
+          description: The data of the pokemon have been updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - species
+                  - level
+                  - genderTypeCode
+                  - size
+                  - weight
+                  - isShiny
+                  - trainerId
+                  - boxId
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a pokemon
+                        example: 4242
+                      trainerId:
+                        type: number
+                        description: the unique identifier of a trainer
+                        example: 42
+                      boxId:
+                        type: number
+                        description: the unique identifier of a box
+                        example: 15
+                  - $ref: "#/components/schemas/Pokemon"
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+        "404":
+          description: The pokemonId does not match any of the pokemons
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Pokemons
+      summary: deletes the pokemon
+      description: It deletes everything about a pokemon
+      parameters:
+        - in: path
+          name: pokemonId
+          description: the unique identifier of a pokemon
+          required: true
+          schema:
+            type: integer
+            example: 4242
+      responses:
+        "200":
+          description: The data of the pokemon have been entirely removed
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+      security:
+        - bearerAuth: []
+
+  /trades:
+    post:
+      tags:
+        - Trades
+      summary: offer a trade with someone
+      description: >-
+        It creates a trade between the calling trainer, that will be the sender and someone else.
+        The maximum of pokemon that each side can trade is 6 per trade.
+      requestBody:
+        description: the information of the trade
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pokemonsOfferedIds
+                - pokemonsWantedIds
+                - receiverId
+              allOf:
+                - type: object
+                  properties:
+                    pokemonsOfferedIds:
+                      type: array
+                      maxItems: 6
+                      uniqueItems: true
+                      items:
+                        type: integer
+                        description: the unique identifier of a pokemon
+                        example: 12
+                    pokemonsWantedIds:
+                      type: array
+                      maxItems: 6
+                      uniqueItems: true
+                      items:
+                        type: integer
+                        description: the unique identifier of a pokemon
+                        example: 13
+                    receiverId:
+                      type: number
+                      description: the unique identifier of the trainer that will receive the trade proposition
+                      example: 42
+      responses:
+        "201":
+          description: The trade have been created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a pokemon
+                        example: 93270
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: User not authorized
+        "404":
+          description: >-
+            The trainer id of the receiver does not match any of the trainer id received
+            One of the pokemon id does not match any of the pokemons
+        "422":
+          description: Your request cannot be processed as it tries to do an action that would result in a database problem
+      security:
+        - bearerAuth: []
+
+  /trades/{tradeId}:
+    get:
+      tags:
+        - Trades
+      summary: retrieve data on a trade
+      description: It retrieves the data on one particular trade
+      parameters:
+        - in: path
+          name: tradeId
+          description: the unique identifier of a trade
+          required: true
+          schema:
+            type: integer
+            example: 4242
+      responses:
+        "200":
+          description: The data of the trade matching the given tradeId
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - statusCode
+                  - sender
+                  - receiver
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a trade
+                        example: 93270
+                      statusCode:
+                        type: string
+                        enum: [PROPOSITION,ACCEPTED,DECLINED]
+                        example: ACCEPTED
+                      sender:
+                        type: object
+                        required:
+                          - id
+                          - pokemons
+                        allOf:
+                          - type: object
+                            properties:
+                              id:
+                                type: number
+                                description: the unique identifier of a trainer
+                                example: 42
+                              pokemons:
+                                type: array
+                                description: an array of pokemon identifiers
+                                items:
+                                  type: integer
+                                  description: the unique identifier of a pokemon
+                                  example: 4242
+                                maxItems: 6
+                                uniqueItems: true
+                      receiver:
+                        type: object
+                        required:
+                          - id
+                          - pokemons
+                        allOf:
+                          - type: object
+                            properties:
+                              id:
+                                type: number
+                                description: the unique identifier of a trainer
+                                example: 24
+                              pokemons:
+                                type: array
+                                description: an array of pokemon identifiers
+                                items:
+                                  type: integer
+                                  description: the unique identifier of a pokemon
+                                  example: 4242
+                                maxItems: 6
+                                uniqueItems: true
+        "401":
+          description: User not authorized
+        "404":
+          description: The tradeId does not match any of the trades
+      security:
+        - bearerAuth: []
+    patch:
+      tags:
+        - Trades
+      summary: updates the status of a trade
+      description: >-
+        It updates the status of one particular trade
+        Beware there is a bug : when a trade is ACCEPTED the trades referencing the Pokemons aren't set as DECLINED
+      parameters:
+        - in: path
+          name: tradeId
+          description: the unique identifier of a trade
+          required: true
+          schema:
+            type: integer
+            example: 93270
+      requestBody:
+        description: the information of the pokemon
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - statusCode
+              description: the pokemon data
+              allOf:
+                - type: object
+                  properties:
+                    statusCode:
+                      type: string
+                      enum: [ACCEPTED,DECLINED]
+                      example: ACCEPTED
+      responses:
+        "200":
+          description: The data of the trade matching the given tradeId
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: number
+                        description: the unique identifier of a trade
+                        example: 93270
+        "400":
+          description: Your request doesn't have the fields expected
+        "401":
+          description: User not authorized
+        "403":
+          description: You are forbidden to perform this action
+        "404":
+          description: The tradeId does not match any of the trades
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    Trainer:
+      type: object
+      properties:
+        lastName:
+          type: string
+          example: Ketchum
+        firstName:
+          type: string
+          example: Ash
+        login:
+          type: string
+          format: email
+          example: ash.ketchum@kanto.fr
+        birthDate:
+          type: string
+          format: date
+          example: 1997-04-01
+
+    PokemonData:
+      type: object
+      properties:
+        species:
+          type: string
+          maxLength: 12
+          example: Pikachu
+        name:
+          type: string
+          description: by default should be the same as species
+          maxLength: 12
+          example: ThunderBoy
+        level:
+          type: integer
+          minimum: 1
+          maximum: 100
+          example: 18
+        genderTypeCode:
+          type: string
+          enum: [MALE, FEMALE, NOT_DEFINED]
+          example: NOT_DEFINED
+        isShiny:
+          type: boolean
+          example: true
+
+    Pokemon:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/PokemonData"
+        - type: object
+          properties:
+            size:
+              type: integer
+              description: in centimeters
+              minimum: 1
+              example: 183
+            weight:
+              type: integer
+              format: float
+              description: in kilograms
+              minimum: 0.1
+
+    Box:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 16
+          example: Box n°1
+
+    TraderData:
+      type: object
+      properties:
+        id:
+          type: number
+          description: the unique identifier of a trainer
+          example: 1
+        pokemons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pokemon"
+          maxItems: 6
+          uniqueItems: true
+
+    TradedPokemons:
+      type: object
+      properties:
+        pokemons:
+          type: array
+          maxItems: 6
+          uniqueItems: true
+          items:
+            type: object
+            required:
+              - id
+              - species
+              - name
+              - level
+              - genderTypeCode
+              - isShiny
+            allOf:
+              - type: object
+                properties:
+                  id:
+                    type: number
+                    description: the unique identifier of a pokemon
+                    example: 4242
+                  species:
+                    type: string
+                    maxLength: 12
+                    example: Pikachu
+                  name:
+                    type: string
+                    description: by default should be the same as species
+                    maxLength: 12
+                    example: ThunderBoy
+                  level:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    example: 18
+                  genderTypeCode:
+                    type: string
+                    enum: [MALE, FEMALE, NOT_DEFINED]
+                    example: NOT_DEFINED
+                  isShiny:
+                    type: boolean
+                    example: true
+
+    Trade:
+      type: object
+      properties:
+        sender:
+          type: object
+          description: the trainer that issued the trade
+          allOf:
+            - $ref: "#/components/schemas/TraderData"
+        receiver:
+          type: object
+          description: the trainer that received the trade, they're the one that can change it's status
+          allOf:
+            - $ref: "#/components/schemas/TraderData"
+        statusCode:
+          type: string
+          enum: [PROPOSITION,ACCEPTED,DECLINED]
+          example: ACCEPTED
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
