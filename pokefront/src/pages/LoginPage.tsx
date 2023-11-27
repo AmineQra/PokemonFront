@@ -1,19 +1,19 @@
-// LoginPage.tsx
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const { login: authLogin } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      // Send data to the backend for verification and login
-      // If successful, redirect the user to the main page
-      // You can use the useHistory hook from React Router for this
-      // Example: history.push('/home');
+      await authLogin({ login, password });
+      navigate("/");
     } catch (error) {
-      // Handle login errors, display a message to the user, etc.
-      console.error("Login error:", error);
+      console.error("Error during login:", error);
     }
   };
 
@@ -23,11 +23,11 @@ const LoginPage: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4">Connexion à PokéApp</h2>
         <form>
           <label className="block mb-2">
-            Nom d'utilisateur:
+            Nom d&lsquo;utilisateur:
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
               className="border border-gray-300 p-2 w-full rounded"
             />
           </label>

@@ -4,19 +4,34 @@ import React, { useState } from "react";
 const RegistrationPage: React.FC = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [username, setUsername] = useState("");
+  const [login, setUsername] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [password, setPassword] = useState("");
 
   const handleRegistration = async () => {
     try {
-      // Send data to the backend for registration
-      // If successful, redirect the user to the main page
-      // You can use the useHistory hook from React Router for this
-      // Example: history.push('/home');
+      fetch("http://localhost:8000/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: firstName,
+          lastName: lastName,
+          login: login,
+          birthDate: birthdate,
+          password: password,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((error) => {
+          console.error("Error during fetch:", error);
+        });
     } catch (error) {
-      // Handle registration errors, display a message to the user, etc.
-      console.error("Registration error:", error);
+      console.error("Error during login:", error);
     }
   };
 
@@ -44,10 +59,10 @@ const RegistrationPage: React.FC = () => {
             />
           </label>
           <label className="block mb-2">
-            Nom d'utilisateur:
+            Nom d&lsquo;utilisateur:
             <input
               type="text"
-              value={username}
+              value={login}
               onChange={(e) => setUsername(e.target.value)}
               className="border border-gray-300 p-2 w-full rounded"
             />
@@ -55,7 +70,7 @@ const RegistrationPage: React.FC = () => {
           <label className="block mb-2">
             Date de naissance:
             <input
-              type="text"
+              type="date"
               value={birthdate}
               onChange={(e) => setBirthdate(e.target.value)}
               className="border border-gray-300 p-2 w-full rounded"
@@ -75,7 +90,7 @@ const RegistrationPage: React.FC = () => {
             onClick={handleRegistration}
             className="bg-gray-500 text-white py-2 px-4 rounded"
           >
-            S'inscrire
+            S&lsquo;inscrire
           </button>
         </form>
       </div>

@@ -1,22 +1,30 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Header from "./components/Header";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import LoginPage from "./pages/LoginPage";
-import RegistrationPage from "./pages/RegistrationPage";
+import RegisterPage from "./pages/RegistrationPage";
+import HomePage from "./pages/HomePage";
+import Header from "./components/Header";
 import "./index.css";
+import BoxPage from "./pages/BoxPage";
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="">
-      <Router>
+    <Router>
+      <AuthProvider>
         <Header />
         <Routes>
-          <Route path="/connexion" element={<LoginPage />} />
-          <Route path="/inscription" element={<RegistrationPage />} />
-          {/* Add other routes for other pages */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/boxes"
+            element={<BoxPage boxes={[]} isUserBoxes={true} />}
+          />
         </Routes>
-      </Router>
-    </div>
+      </AuthProvider>
+    </Router>
   );
-}
+};
 
 export default App;
