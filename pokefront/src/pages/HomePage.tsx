@@ -10,7 +10,7 @@ const HomePage: React.FC = () => {
     if (!isAuthenticated) {
       navigate("/login");
     } else {
-      navigate("/boites");
+      navigate("/boxes");
     }
   }, [isAuthenticated, navigate]);
 

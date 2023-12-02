@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from "react";
-import NotificationProps from "../components/Notification";
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -23,9 +22,6 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setAuthenticated] = useState(false);
-  const [notification, setNotification] = useState<NotificationProps | null>(
-    null
-  );
 
   const login = async (loginData: { login: string; password: string }) => {
     try {
@@ -43,34 +39,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const data = await response.json();
-      const { accessToken } = data;
+      const { trainerId, accessToken } = data;
 
       sessionStorage.setItem("accessToken", accessToken);
-
-      setNotification({ message: "Login successful", type: "success" });
+      sessionStorage.setItem("trainerId", trainerId);
 
       setAuthenticated(true);
     } catch (error) {
       console.error("Error during login:", error);
-      setNotification({ message: "Login failed", type: "error" });
     }
   };
 
   const logout = () => {
     sessionStorage.removeItem("accessToken");
-    setNotification({ message: "Logout successful", type: "success" });
+    sessionStorage.removeItem("trainerId");
     setAuthenticated(false);
   };
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
       {children}
-      {notification && (
-        <NotificationProps
-          message={notification.message}
-          type={notification.type}
-        />
-      )}
     </AuthContext.Provider>
   );
 };

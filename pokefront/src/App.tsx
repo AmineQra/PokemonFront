@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import Header from "./components/Header";
 import "./index.css";
 import BoxPage from "./pages/BoxPage";
+import BoxCreation from "./components/BoxCreation";
 
 const App: React.FC = () => {
   return (
@@ -17,10 +18,8 @@ const App: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/boxes"
-            element={<BoxPage boxes={[]} isUserBoxes={true} />}
-          />
+          <Route path="/boxes" element={<BoxPage />} />
+          <Route path="/create-box" element={<BoxCreation />} />
         </Routes>
       </AuthProvider>
     </Router>

@@ -1,34 +1,64 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+// BoxListPage.tsx
+import React, { useEffect, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import useAuthCheck from "../hooks/AuthCheck";
 
-interface BoxPageProps {
-  boxes: string[];
-  isUserBoxes: boolean;
-}
+const BoxListPage: React.FC = () => {
+  const { isAuthenticated, logout } = useAuth();
+  const [boxes, setBoxes] = useState<Array<{ id: number; name: string }>>([]);
 
-const BoxPage: React.FC<BoxPageProps> = ({ boxes, isUserBoxes }) => {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  useAuthCheck();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
+    const fetchBoxes = async () => {
+      try {
+        const trainerId = sessionStorage.getItem("trainerId");
+        const response = await fetch(
+          `http://localhost:8000/trainers/${trainerId}/boxes`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            // Unauthorized, redirect to login
+            logout();
+            return <Navigate to="/login" />;
+          } else {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+        }
+
+        const data = await response.json();
+        setBoxes(data);
+      } catch (error) {
+        console.error("Error fetching boxes:", error);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchBoxes();
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, logout]);
 
   return (
     <div>
-      <h2>Liste des boîtes</h2>
+      <h2>Liste des Boîtes</h2>
       <ul>
-        {boxes.map((box, index) => (
-          <li key={index}>
-            <Link to={`/boites/${index}`}>{box}</Link>
+        {boxes.map((box) => (
+          <li key={box.id}>
+            <Link to={`/box/${box.id}`}>{box.name}</Link>
           </li>
         ))}
       </ul>
-      {isUserBoxes && (
-        <Link to="/creation-boite">
+
+      {isAuthenticated && (
+        <Link to="/create-box">
           <button>Ajout d&lsquo;une boîte</button>
         </Link>
       )}
@@ -36,4 +66,4 @@ const BoxPage: React.FC<BoxPageProps> = ({ boxes, isUserBoxes }) => {
   );
 };
 
-export default BoxPage;
+export default BoxListPage;
