@@ -5,9 +5,14 @@ interface AuthContextProps {
   login: (loginData: { login: string; password: string }) => Promise<void>;
   logout: () => void;
 }
+var auth;
+
+if (sessionStorage.getItem("accessToken")) {
+  auth = true;
+}
 
 const initialAuthState = {
-  isAuthenticated: false,
+  isAuthenticated: auth || false,
   login: async () => {},
   logout: () => {},
 };

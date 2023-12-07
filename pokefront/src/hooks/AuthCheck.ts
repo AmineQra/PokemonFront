@@ -1,4 +1,3 @@
-// useAuthCheck.ts
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -10,10 +9,12 @@ const useAuthCheck = () => {
 
     if (!accessToken) {
       navigate("/login");
+    } else {
+      navigate("/boxes");
     }
   }, [navigate]);
 
-  return "unauthorized";
+  return "authorized";
 };
 
 export default useAuthCheck;

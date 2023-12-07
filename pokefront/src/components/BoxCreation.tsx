@@ -1,4 +1,3 @@
-// BoxCreationPage.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -14,7 +13,6 @@ const BoxCreation: React.FC = () => {
 
   const handleCreateBox = async () => {
     try {
-      // Replace with the actual trainerId
       const trainerId = sessionStorage.getItem("trainerId");
 
       const response = await fetch(
@@ -33,7 +31,6 @@ const BoxCreation: React.FC = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // Box created successfully, redirect to the box list page
       navigate("/boxes");
     } catch (error) {
       console.error("Error creating box:", error);
@@ -41,17 +38,25 @@ const BoxCreation: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Création d&lsquo;une Boîte</h2>
-      <label>Nom de la boîte:</label>
-      <input
-        type="text"
-        value={boxName}
-        onChange={(e) => setBoxName(e.target.value)}
-        placeholder="Nom de la boîte"
-      />
+    <div className="flex flex-col justify-center items-center h-screen opacity-95">
+      <div className="bg-white shadow-md rounded-md p-4 flex flex-col justify-center items-center w-96 h-64">
+        <h2 className="text-2xl font-bold mb-4">Création d'une Boîte</h2>
+        <label className="mb-2">Nom de la boîte:</label>
+        <input
+          type="text"
+          value={boxName}
+          onChange={(e) => setBoxName(e.target.value)}
+          placeholder="Nom de la boîte"
+          className="border border-gray-300 rounded-md px-2 py-1 mb-2"
+        />
 
-      <button onClick={handleCreateBox}>Créer la boîte</button>
+        <button
+          onClick={handleCreateBox}
+          className="mt-8 bg-blue-500 text-white px-4 py-2 rounded-md"
+        >
+          Créer la boîte
+        </button>
+      </div>
     </div>
   );
 };

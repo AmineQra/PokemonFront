@@ -36,8 +36,8 @@ const RegistrationPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="bg-white p-8 rounded shadow-md w-96 border border-gray-200">
+    <div className="flex items-center justify-center h-screen opacity-90">
+      <div className="bg-[#FFF9ED] p-8 rounded shadow-md w-96 border border-gray-200">
         <h2 className="text-2xl font-bold mb-4">Inscription à PokéApp</h2>
         <form>
           <label className="block mb-2">
@@ -88,7 +88,7 @@ const RegistrationPage: React.FC = () => {
           <button
             type="button"
             onClick={handleRegistration}
-            className="bg-gray-500 text-white py-2 px-4 rounded"
+            className="bg-green-500 text-white py-2 px-4 rounded"
           >
             S&lsquo;inscrire
           </button>

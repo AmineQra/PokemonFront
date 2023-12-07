@@ -41,27 +41,31 @@ const BoxListPage: React.FC = () => {
       }
     };
 
-    if (isAuthenticated) {
-      fetchBoxes();
-    }
+    fetchBoxes();
   }, [isAuthenticated, logout]);
 
   return (
-    <div>
-      <h2>Liste des Boîtes</h2>
-      <ul>
-        {boxes.map((box) => (
-          <li key={box.id}>
-            <Link to={`/box/${box.id}`}>{box.name}</Link>
-          </li>
-        ))}
-      </ul>
+    <div className="flex justify-center items-center h-screen opacity-95">
+      <div className="flex flex-col justify-center items-center bg-[#FFF9ED] rounded-lg shadow-lg p-6 w-96">
+        <h2 className="text-2xl font-bold mb-4">Liste des Boîtes</h2>
+        <ul className="grid grid-cols-3 gap-4">
+          {boxes.map((box) => (
+            <Link to={`/box/${box.id}`} key={box.id}>
+              <li>
+                <div className="bg-white rounded-lg shadow-lg p-4">
+                  {box.name}
+                </div>
+              </li>
+            </Link>
+          ))}
+        </ul>
 
-      {isAuthenticated && (
         <Link to="/create-box">
-          <button>Ajout d&lsquo;une boîte</button>
+          <button className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+            Ajout d'une boîte
+          </button>
         </Link>
-      )}
+      </div>
     </div>
   );
 };

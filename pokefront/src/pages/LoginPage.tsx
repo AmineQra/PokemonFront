@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import useAuthCheck from "../hooks/AuthCheck";
 
 const LoginPage: React.FC = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
+
+  useAuthCheck();
 
   const handleLogin = async () => {
     try {
@@ -18,8 +21,8 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="bg-white p-8 rounded shadow-md w-96 border border-gray-200">
+    <div className="flex items-center justify-center h-screen opacity-95">
+      <div className="bg-[#FFF9ED] p-8 rounded shadow-md w-96 border border-gray-200">
         <h2 className="text-2xl font-bold mb-4">Connexion à PokéApp</h2>
         <form>
           <label className="block mb-2">
@@ -43,7 +46,7 @@ const LoginPage: React.FC = () => {
           <button
             type="button"
             onClick={handleLogin}
-            className="bg-gray-500 text-white py-2 px-4 rounded"
+            className="bg-blue-500 text-white py-2 px-4 rounded"
           >
             Connexion
           </button>
