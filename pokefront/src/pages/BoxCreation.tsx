@@ -1,15 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import useAuthCheck from "../hooks/AuthCheck";
 
 const BoxCreation: React.FC = () => {
   const [boxName, setBoxName] = useState("");
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  if (!isAuthenticated) {
-    navigate("/login");
-  }
+  useAuthCheck();
 
   const handleCreateBox = async () => {
     try {
@@ -39,7 +36,7 @@ const BoxCreation: React.FC = () => {
 
   return (
     <div className="flex flex-col justify-center items-center h-screen opacity-95">
-      <div className="bg-white shadow-md rounded-md p-4 flex flex-col justify-center items-center w-96 h-64">
+      <div className="bg-white shadow-md rounded-md p-4 flex flex-col justify-center items-center w-96">
         <h2 className="text-2xl font-bold mb-4">Création d'une Boîte</h2>
         <label className="mb-2">Nom de la boîte:</label>
         <input
@@ -55,6 +52,12 @@ const BoxCreation: React.FC = () => {
           className="mt-8 bg-blue-500 text-white px-4 py-2 rounded-md"
         >
           Créer la boîte
+        </button>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-8 bg-purple-500 text-white px-4 py-2 rounded-md"
+        >
+          retour
         </button>
       </div>
     </div>

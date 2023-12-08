@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import useAuthCheck from "../hooks/AuthCheck";
 
 const PokeDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  useAuthCheck();
 
   const [pokemon, setPokemon] = useState<any>({});
 
@@ -50,7 +53,7 @@ const PokeDetail: React.FC = () => {
       });
 
       if (response.ok) {
-        navigate(`/box-detail/${pokemon.boxId}`);
+        navigate(`/box/${pokemon.boxId}`);
       } else {
         console.error("Error deleting Pokemon:", response.statusText);
       }

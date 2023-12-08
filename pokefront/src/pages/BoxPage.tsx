@@ -46,7 +46,7 @@ const BoxListPage: React.FC = () => {
 
   return (
     <div className="flex justify-center items-center h-screen opacity-95">
-      <div className="flex flex-col justify-center items-center bg-[#FFF9ED] rounded-lg shadow-lg p-6 w-96">
+      <div className="flex flex-col justify-center items-center bg-[#FFF9ED] rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-4">Liste des Boîtes</h2>
         <ul className="grid grid-cols-3 gap-4">
           {boxes.map((box) => (

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuthCheck from "../hooks/AuthCheck";
 
 const AddPoke: React.FC = () => {
   const [species, setSpecies] = useState("");
@@ -10,6 +11,8 @@ const AddPoke: React.FC = () => {
   const [weight, setWeight] = useState("");
   const [isShiny, setIsShiny] = useState(false);
   const navigate = useNavigate();
+
+  useAuthCheck();
 
   const handleCreatePokemon = async () => {
     try {

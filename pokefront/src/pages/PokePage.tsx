@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CgPokemon } from "react-icons/cg";
+import useAuthCheck from "../hooks/AuthCheck";
 
 const PokePage: React.FC = () => {
   const [speciesFilter, setSpeciesFilter] = useState("");
@@ -12,8 +13,10 @@ const PokePage: React.FC = () => {
   const [minWeightFilter, setMinWeightFilter] = useState(0.1);
   const [maxWeightFilter, setMaxWeightFilter] = useState(100);
   const [isShinyFilter, setIsShinyFilter] = useState(Boolean);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [pokemons, setPokemons] = useState<Array<any>>([]);
+
+  useAuthCheck();
 
   const handleSpeciesFilterChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -83,11 +86,10 @@ const PokePage: React.FC = () => {
   };
 
   const handlePreviousPage = () => {
-    if (currentPage <= 1) {
+    if (currentPage <= 0) {
       return;
     }
     setCurrentPage((prevPage) => prevPage - 1);
-    console.log("previous page");
   };
 
   useEffect(() => {

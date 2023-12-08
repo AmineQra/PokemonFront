@@ -6,11 +6,24 @@ const useAuthCheck = () => {
 
   useEffect(() => {
     const accessToken = sessionStorage.getItem("accessToken");
+    const trainerId = sessionStorage.getItem("trainerId");
 
     if (!accessToken) {
       navigate("/login");
     } else {
-      navigate("/boxes");
+      fetch(`http://localhost:8000/trainers/${trainerId}/boxes`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+        .then((response) => {
+          if (response.status == 401) {
+            navigate("/login");
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
   }, [navigate]);
 

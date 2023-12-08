@@ -19,6 +19,7 @@ const LoginPage: React.FC = () => {
       console.error("Error during login:", error);
     }
   };
+  sessionStorage.clear();
 
   return (
     <div className="flex items-center justify-center h-screen opacity-95">
