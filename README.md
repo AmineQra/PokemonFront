@@ -26,4 +26,10 @@ Please note that it might take some time to initialize the MySQL database.
 
 4. You can access the API locally at `http://localhost:8000`.
 
+5. you can run the frontend now
+
+   ```bash
+   docker-compose up frontend
+   ```
+
 That's it! You are now ready to use the PC Pokemon API.
